@@ -1,4 +1,4 @@
-use anyhow::{Error, Result};
+use anyhow::{Context, Error, Result};
 
 #[derive(PartialEq)]
 pub struct ChunkType {
@@ -16,6 +16,19 @@ impl TryFrom<[u8; 4]> for ChunkType {
 
     fn try_from(bytes: [u8; 4]) -> Result<Self> {
         Ok(Self { bytes })
+    }
+}
+
+impl std::str::FromStr for ChunkType {
+    type Err = Error;
+
+    fn from_str(s: &str) -> Result<Self> {
+        Ok(Self {
+            bytes: s
+                .as_bytes()
+                .try_into()
+                .context("str is not a valid Chunk")?,
+        })
     }
 }
 
