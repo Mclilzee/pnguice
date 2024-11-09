@@ -1,3 +1,5 @@
+#![allow(unused_variables, dead_code)]
+
 use std::fmt::Display;
 
 use anyhow::{Context, Error, Result};
@@ -13,23 +15,23 @@ impl ChunkType {
     }
 
     pub fn is_critical(&self) -> bool {
-        true
+        self.bytes[0].is_ascii_uppercase()
     }
 
     pub fn is_public(&self) -> bool {
-        true
+        self.bytes[1].is_ascii_uppercase()
     }
 
     pub fn is_reserved_bit_valid(&self) -> bool {
-        true
+        self.bytes[2].is_ascii_uppercase()
     }
 
     pub fn is_safe_to_copy(&self) -> bool {
-        true
+        self.bytes[3].is_ascii_lowercase()
     }
 
     pub fn is_valid(&self) -> bool {
-        true
+        !self.bytes.iter().any(|b| !b.is_ascii())
     }
 }
 
