@@ -1,6 +1,8 @@
+use std::fmt::Display;
+
 use anyhow::{Context, Error, Result};
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Debug)]
 pub struct ChunkType {
     bytes: [u8; 4],
 }
@@ -8,6 +10,26 @@ pub struct ChunkType {
 impl ChunkType {
     pub fn bytes(&self) -> [u8; 4] {
         self.bytes
+    }
+
+    pub fn is_critical(&self) -> bool {
+        true
+    }
+
+    pub fn is_public(&self) -> bool {
+        true
+    }
+
+    pub fn is_reserved_bit_valid(&self) -> bool {
+        true
+    }
+
+    pub fn is_safe_to_copy(&self) -> bool {
+        true
+    }
+
+    pub fn is_valid(&self) -> bool {
+        true
     }
 }
 
@@ -29,6 +51,15 @@ impl std::str::FromStr for ChunkType {
                 .try_into()
                 .context("str is not a valid Chunk")?,
         })
+    }
+}
+
+impl Display for ChunkType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match String::from_utf8(self.bytes.to_vec()) {
+            Ok(text) => f.write_str(&text),
+            Err(_) => Err(std::fmt::Error),
+        }
     }
 }
 
