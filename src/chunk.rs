@@ -168,6 +168,7 @@ mod tests {
         assert_eq!(chunk.chunk_type().to_string(), String::from("RuSt"));
         assert_eq!(chunk_string, expected_chunk_string);
         assert_eq!(chunk.crc(), 2882656334);
+        assert_eq!(chunk_data, chunk.as_bytes());
     }
 
     #[test]
