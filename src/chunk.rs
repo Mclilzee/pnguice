@@ -1,8 +1,7 @@
 #![allow(unused_variables, dead_code)]
 use std::fmt::Display;
-
 use crate::chunk_type::ChunkType;
-use anyhow::{Error, Result};
+use anyhow::{Error, Result, Context};
 
 pub struct Chunk {
     chunk_type: ChunkType,
@@ -32,7 +31,7 @@ impl Chunk {
     }
 
     pub fn data_as_string(&self) -> Result<String> {
-        Ok("".to_string())
+        String::from_utf8(self.data.clone()).context("Chunk data is not a correct string format")
     }
 }
 
@@ -52,7 +51,8 @@ impl TryFrom<&[u8]> for Chunk {
 impl Display for Chunk {
 
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        todo!()
+        let str = self.data_as_string().map_err(|_| std::fmt::Error)?;
+        f.write_str(&str)
     }
 }
 
