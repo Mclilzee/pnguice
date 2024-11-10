@@ -1,20 +1,26 @@
 #![allow(unused_variables, dead_code)]
+use std::fmt::Display;
+
 use crate::chunk_type::ChunkType;
 use anyhow::{Error, Result};
 
 pub struct Chunk {
     chunk_type: ChunkType,
-    length: u32,
+    data: Vec<u8>,
     crc: u32,
 }
 
 impl Chunk {
     pub fn new(chunk_type: ChunkType, data: Vec<u8>) -> Self {
         Self {
+            data,
             chunk_type,
-            length: 0,
             crc: 0,
         }
+    }
+
+    pub fn length(&self) -> u32 {
+        self.data.len() as u32
     }
 
     pub fn chunk_type(&self) -> &ChunkType {
@@ -24,6 +30,10 @@ impl Chunk {
     pub fn crc(&self) -> u32 {
         self.crc
     }
+
+    pub fn data_as_string(&self) -> Result<String> {
+        Ok("".to_string())
+    }
 }
 
 impl TryFrom<&[u8]> for Chunk {
@@ -32,10 +42,17 @@ impl TryFrom<&[u8]> for Chunk {
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         let bytes: [u8; 4] = value.try_into()?;
         Ok(Self {
-            length: 0,
+            data: value.to_vec(),
             crc: 0,
             chunk_type: ChunkType::try_from(bytes)?,
         })
+    }
+}
+
+impl Display for Chunk {
+
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        todo!()
     }
 }
 
