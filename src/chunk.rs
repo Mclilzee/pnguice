@@ -25,6 +25,10 @@ impl Chunk {
         self.data.len() as u32
     }
 
+    pub fn data(&self) -> &[u8] {
+        &self.data
+    }
+
     pub fn chunk_type(&self) -> &ChunkType {
         &self.chunk_type
     }
@@ -57,8 +61,13 @@ impl TryFrom<&[u8]> for Chunk {
 
 impl Display for Chunk {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let str = self.data_as_string().map_err(|_| std::fmt::Error)?;
-        f.write_str(&str)
+        writeln!(f, "Chunk {{",)?;
+        writeln!(f, "  Length: {}", self.length())?;
+        writeln!(f, "  Type: {}", self.chunk_type())?;
+        writeln!(f, "  Data: {} bytes", self.data().len())?;
+        writeln!(f, "  Crc: {}", self.crc())?;
+        writeln!(f, "}}",)?;
+        Ok(())
     }
 }
 
