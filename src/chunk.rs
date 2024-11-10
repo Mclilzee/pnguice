@@ -1,7 +1,10 @@
 #![allow(unused_variables, dead_code)]
-use std::fmt::Display;
 use crate::chunk_type::ChunkType;
-use anyhow::{Error, Result, Context};
+use anyhow::{Context, Error, Result};
+use crc::Crc;
+use std::fmt::Display;
+
+const CRC: Crc<u32> = Crc::<u32>::new(&crc::CRC_32_AIXM);
 
 pub struct Chunk {
     chunk_type: ChunkType,
@@ -12,9 +15,9 @@ pub struct Chunk {
 impl Chunk {
     pub fn new(chunk_type: ChunkType, data: Vec<u8>) -> Self {
         Self {
-            data,
             chunk_type,
-            crc: 0,
+            crc: CRC.checksum(&data),
+            data,
         }
     }
 
@@ -39,17 +42,20 @@ impl TryFrom<&[u8]> for Chunk {
     type Error = Error;
 
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        let bytes: [u8; 4] = value.try_into()?;
+        let length = u32::from_be_bytes(value[0..4].try_into()?) as usize;
+        let chunk_type: &[u8; 4] = &value[4..8].try_into()?;
+        let data = value[8..length + 8].to_vec();
+        let crc = u32::from_be_bytes(value[length + 8..].try_into()?);
+
         Ok(Self {
-            data: value.to_vec(),
-            crc: 0,
-            chunk_type: ChunkType::try_from(bytes)?,
+            crc,
+            data,
+            chunk_type: ChunkType::try_from(chunk_type.to_owned())?,
         })
     }
 }
 
 impl Display for Chunk {
-
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let str = self.data_as_string().map_err(|_| std::fmt::Error)?;
         f.write_str(&str)
@@ -66,7 +72,7 @@ mod tests {
         let data_length: u32 = 42;
         let chunk_type = "RuSt".as_bytes();
         let message_bytes = "This is where your secret message will be!".as_bytes();
-        let crc: u32 = 2882656334;
+        let crc: u32 = 2753950791;
 
         let chunk_data: Vec<u8> = data_length
             .to_be_bytes()
@@ -88,7 +94,7 @@ mod tests {
             .to_vec();
         let chunk = Chunk::new(chunk_type, data);
         assert_eq!(chunk.length(), 42);
-        assert_eq!(chunk.crc(), 2882656334);
+        assert_eq!(chunk.crc(), 2753950791);
     }
 
     #[test]
@@ -114,7 +120,7 @@ mod tests {
     #[test]
     fn test_chunk_crc() {
         let chunk = testing_chunk();
-        assert_eq!(chunk.crc(), 2882656334);
+        assert_eq!(chunk.crc(), 2402681417);
     }
 
     #[test]
@@ -122,7 +128,7 @@ mod tests {
         let data_length: u32 = 42;
         let chunk_type = "RuSt".as_bytes();
         let message_bytes = "This is where your secret message will be!".as_bytes();
-        let crc: u32 = 2882656334;
+        let crc: u32 = 2753950791;
 
         let chunk_data: Vec<u8> = data_length
             .to_be_bytes()
@@ -141,7 +147,7 @@ mod tests {
         assert_eq!(chunk.length(), 42);
         assert_eq!(chunk.chunk_type().to_string(), String::from("RuSt"));
         assert_eq!(chunk_string, expected_chunk_string);
-        assert_eq!(chunk.crc(), 2882656334);
+        assert_eq!(chunk.crc(), 2753950791);
     }
 
     #[test]
@@ -149,7 +155,7 @@ mod tests {
         let data_length: u32 = 42;
         let chunk_type = "RuSt".as_bytes();
         let message_bytes = "This is where your secret message will be!".as_bytes();
-        let crc: u32 = 2882656333;
+        let crc: u32 = 2753950791;
 
         let chunk_data: Vec<u8> = data_length
             .to_be_bytes()
@@ -170,7 +176,7 @@ mod tests {
         let data_length: u32 = 42;
         let chunk_type = "RuSt".as_bytes();
         let message_bytes = "This is where your secret message will be!".as_bytes();
-        let crc: u32 = 2882656334;
+        let crc: u32 = 2753950791;
 
         let chunk_data: Vec<u8> = data_length
             .to_be_bytes()
