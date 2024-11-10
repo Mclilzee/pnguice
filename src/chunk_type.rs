@@ -31,7 +31,7 @@ impl ChunkType {
     }
 
     pub fn is_valid(&self) -> bool {
-        !self.bytes.iter().any(|b| !b.is_ascii_alphabetic())
+        self.is_reserved_bit_valid()
     }
 }
 
@@ -47,11 +47,9 @@ impl std::str::FromStr for ChunkType {
     type Err = Error;
 
     fn from_str(s: &str) -> Result<Self> {
-        if s.len() != 4 || s.as_bytes()
-            .iter()
-            .take(4)
-            .any(|b| !b.is_ascii_alphabetic())
-        {
+        let bytes = s.as_bytes();
+
+        if bytes.len() != 4 || bytes.iter().any(|b| !b.is_ascii_alphabetic()) {
             anyhow::bail!("str is not a valid Chunk");
         }
 
