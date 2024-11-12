@@ -56,7 +56,10 @@ impl Png {
     }
 
     pub fn as_bytes(&self) -> Vec<u8> {
-        self.chunks.iter().flat_map(|c| c.as_bytes()).collect()
+        Self::STANDARD_HEADER
+            .into_iter()
+            .chain(self.chunks.iter().flat_map(|c| c.as_bytes()))
+            .collect()
     }
 }
 
