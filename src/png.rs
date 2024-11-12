@@ -1,7 +1,9 @@
 #![allow(unused_variables, dead_code)]
 
+use std::fmt::Display;
+
 use crate::{chunk::Chunk, chunk_type::ChunkType};
-use anyhow::{bail, Context, Error, Result};
+use anyhow::{bail, Error, Result};
 
 pub struct Png {
     chunks: Vec<Chunk>,
@@ -10,11 +12,9 @@ pub struct Png {
 impl Png {
     pub const STANDARD_HEADER: [u8; 8] = [137, 80, 78, 71, 13, 10, 26, 10];
 
-    //fn remove_first_chunk(&mut self, chunk_type: &str) -> Result<Chunk>
-    //fn header(&self) -> &[u8; 8]
-    //fn chunks(&self) -> &[Chunk]
-    //fn chunk_by_type(&self, chunk_type: &str) -> Option<&Chunk>
-    //fn as_bytes(&self) -> Vec<u8>
+    pub fn header(&self) -> &[u8; 8] {
+        &Self::STANDARD_HEADER
+    }
 
     pub fn from_chunks(chunks: Vec<Chunk>) -> Self {
         Self { chunks }
@@ -26,7 +26,7 @@ impl Png {
         self.chunks.iter().find(|c| &chunk_type == c.chunk_type())
     }
 
-    pub fn apend_chunk(&mut self, chunk: Chunk) {
+    pub fn append_chunk(&mut self, chunk: Chunk) {
         self.chunks.push(chunk);
     }
 
@@ -54,11 +54,21 @@ impl Png {
     pub fn chunks(&self) -> &[Chunk] {
         &self.chunks
     }
+
+    pub fn as_bytes(&self) -> Vec<u8> {
+        self.chunks.iter().flat_map(|c| c.as_bytes()).collect()
+    }
 }
 
 impl TryFrom<&[u8]> for Png {
     type Error = Error;
     fn try_from(value: &[u8]) -> std::result::Result<Self, Self::Error> {
+        todo!()
+    }
+}
+
+impl Display for Png {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         todo!()
     }
 }
