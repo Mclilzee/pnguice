@@ -3,6 +3,7 @@ use crate::chunk_type::ChunkType;
 use anyhow::{bail, Context, Error, Result};
 use crc::Crc;
 use std::fmt::Display;
+use std::io::{BufReader, Read};
 
 const CRC: Crc<u32> = Crc::<u32>::new(&crc::CRC_32_AIXM);
 
@@ -57,10 +58,19 @@ impl TryFrom<&[u8]> for Chunk {
     type Error = Error;
 
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        let length = u32::from_be_bytes(value[0..4].try_into()?) as usize;
-        let chunk_type: &[u8; 4] = &value[4..8].try_into()?;
-        let data = value[8..length + 8].to_vec();
-        let crc = u32::from_be_bytes(value[length + 8..].try_into()?);
+        let mut reader = BufReader::new(value);
+        let mut buf = [0u8; 4];
+        reader.read_exact(&mut buf)?;
+        let length = u32::from_be_bytes(buf) as usize;
+
+        reader.read_exact(&mut buf)?;
+        let chunk_type: [u8; 4] = buf;
+
+        let mut data  = vec![0; length];
+        reader.read_exact(&mut data)?;
+
+        reader.read_exact(&mut buf)?;
+        let crc = u32::from_be_bytes(buf);
         if CRC.checksum(&data) != crc {
             bail!("Corrupted data");
         }

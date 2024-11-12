@@ -65,6 +65,7 @@ impl Png {
 
 impl TryFrom<&[u8]> for Png {
     type Error = Error;
+
     fn try_from(value: &[u8]) -> std::result::Result<Self, Self::Error> {
         todo!()
     }
