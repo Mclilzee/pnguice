@@ -72,7 +72,7 @@ impl TryFrom<&[u8]> for Chunk {
         reader.read_exact(&mut buf)?;
         let crc = u32::from_be_bytes(buf);
         if CRC.checksum(&data) != crc {
-            bail!("Corrupted data");
+            bail!("Chunk data has been tempered with and is corrupted");
         }
 
         Ok(Self {
