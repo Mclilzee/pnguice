@@ -60,7 +60,7 @@ impl Png {
     }
 
     pub fn as_bytes(&self) -> Vec<u8> {
-        Self::STANDARD_HEADER
+        self.header
             .into_iter()
             .chain(self.chunks.iter().flat_map(|c| c.as_bytes()))
             .collect()
@@ -84,7 +84,7 @@ impl TryFrom<&[u8]> for Png {
             chunks.push(chunk);
         }
 
-        Ok(Self{header, chunks})
+        Ok(Self { header, chunks })
     }
 }
 
