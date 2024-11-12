@@ -6,6 +6,7 @@ use crate::{chunk::Chunk, chunk_type::ChunkType};
 use anyhow::{bail, Error, Result};
 
 pub struct Png {
+    header: [u8; 8],
     chunks: Vec<Chunk>,
 }
 
@@ -17,7 +18,10 @@ impl Png {
     }
 
     pub fn from_chunks(chunks: Vec<Chunk>) -> Self {
-        Self { chunks }
+        Self {
+            header: Self::STANDARD_HEADER,
+            chunks,
+        }
     }
 
     pub fn chunk_by_type(&self, chunk_type: &str) -> Option<&Chunk> {
@@ -67,7 +71,7 @@ impl TryFrom<&[u8]> for Png {
     type Error = Error;
 
     fn try_from(value: &[u8]) -> std::result::Result<Self, Self::Error> {
-        let mut read = 0;
+        let mut read = 12;
         let mut chunks = vec![];
         while read < value.len() {
             let chunk = Chunk::try_from(&value[read..])?;
@@ -75,13 +79,20 @@ impl TryFrom<&[u8]> for Png {
             chunks.push(chunk);
         }
 
-        Ok(Self::from_chunks(chunks))
+        Ok(Self{header: value[..8].try_into()?, chunks})
     }
 }
 
 impl Display for Png {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        todo!()
+        let str = self
+            .chunks
+            .iter()
+            .map(|c| c.to_string())
+            .collect::<Vec<String>>()
+            .join("\n");
+
+        f.write_str(&str)
     }
 }
 
