@@ -1,6 +1,6 @@
 #![allow(unused_variables, dead_code)]
 
-use std::{fmt::Display, io::{BufReader, Read}};
+use std::fmt::Display;
 
 use crate::{chunk::Chunk, chunk_type::ChunkType};
 use anyhow::{bail, Error, Result};
@@ -91,7 +91,6 @@ mod tests {
     use crate::chunk::Chunk;
     use crate::chunk_type::ChunkType;
     use std::convert::TryFrom;
-    use std::str::FromStr;
 
     fn testing_chunks() -> Vec<Chunk> {
         vec![
