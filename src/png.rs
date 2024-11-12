@@ -1,7 +1,7 @@
 #![allow(unused_variables, dead_code)]
 
 use crate::{chunk::Chunk, chunk_type::ChunkType};
-use anyhow::{Context, Error, Result};
+use anyhow::{bail, Context, Error, Result};
 
 pub struct Png {
     chunks: Vec<Chunk>,
@@ -9,6 +9,12 @@ pub struct Png {
 
 impl Png {
     pub const STANDARD_HEADER: [u8; 8] = [137, 80, 78, 71, 13, 10, 26, 10];
+
+    //fn remove_first_chunk(&mut self, chunk_type: &str) -> Result<Chunk>
+    //fn header(&self) -> &[u8; 8]
+    //fn chunks(&self) -> &[Chunk]
+    //fn chunk_by_type(&self, chunk_type: &str) -> Option<&Chunk>
+    //fn as_bytes(&self) -> Vec<u8>
 
     pub fn from_chunks(chunks: Vec<Chunk>) -> Self {
         Self { chunks }
@@ -18,6 +24,27 @@ impl Png {
         let chunk_type: ChunkType = chunk_type.parse().ok()?;
 
         self.chunks.iter().find(|c| &chunk_type == c.chunk_type())
+    }
+
+    pub fn apend_chunk(&mut self, chunk: Chunk) {
+        self.chunks.push(chunk);
+    }
+
+    pub fn remove_first_chunk(&mut self, chunk_type: &str) -> Result<Chunk> {
+        let chunk_type: ChunkType = chunk_type.parse()?;
+
+        let index = self
+            .chunks
+            .iter()
+            .enumerate()
+            .find(|(_, c)| c.chunk_type() == &chunk_type)
+            .map(|(i, _)| i);
+
+        if let Some(i) = index {
+            Ok(self.chunks.remove(i))
+        } else {
+            bail!("Chunk type were not found")
+        }
     }
 
     pub fn from_str(str: &str) -> Result<Self> {
