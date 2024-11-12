@@ -1,6 +1,6 @@
 #![allow(unused_variables, dead_code)]
 
-use std::fmt::Display;
+use std::{fmt::Display, io::{BufReader, Read}};
 
 use crate::{chunk::Chunk, chunk_type::ChunkType};
 use anyhow::{bail, Error, Result};
@@ -67,7 +67,15 @@ impl TryFrom<&[u8]> for Png {
     type Error = Error;
 
     fn try_from(value: &[u8]) -> std::result::Result<Self, Self::Error> {
-        todo!()
+        let mut read = 0;
+        let mut chunks = vec![];
+        while read < value.len() {
+            let chunk = Chunk::try_from(&value[read..])?;
+            read += 12 + chunk.length() as usize;
+            chunks.push(chunk);
+        }
+
+        Ok(Self::from_chunks(chunks))
     }
 }
 
