@@ -1,14 +1,37 @@
 #![allow(unused_variables, dead_code)]
 
-use crate::chunk::Chunk;
+use crate::{chunk::Chunk, chunk_type::ChunkType};
+use anyhow::{Context, Error, Result};
 
 pub struct Png {
-    header: [u8; 8],
     chunks: Vec<Chunk>,
 }
 
 impl Png {
+    pub const STANDARD_HEADER: [u8; 8] = [137, 80, 78, 71, 13, 10, 26, 10];
+
     pub fn from_chunks(chunks: Vec<Chunk>) -> Self {
+        Self { chunks }
+    }
+
+    pub fn chunk_by_type(&self, chunk_type: &str) -> Option<&Chunk> {
+        let chunk_type: ChunkType = chunk_type.parse().ok()?;
+
+        self.chunks.iter().find(|c| &chunk_type == c.chunk_type())
+    }
+
+    pub fn from_str(str: &str) -> Result<Self> {
+        todo!()
+    }
+
+    pub fn chunks(&self) -> &[Chunk] {
+        &self.chunks
+    }
+}
+
+impl TryFrom<&[u8]> for Png {
+    type Error = Error;
+    fn try_from(value: &[u8]) -> std::result::Result<Self, Self::Error> {
         todo!()
     }
 }
