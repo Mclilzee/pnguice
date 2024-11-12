@@ -72,6 +72,11 @@ impl TryFrom<&[u8]> for Png {
 
     fn try_from(value: &[u8]) -> std::result::Result<Self, Self::Error> {
         let mut read = 8;
+        let header = value[..8].try_into()?;
+        if header != Self::STANDARD_HEADER {
+            bail!("Not a valid PNG header");
+        }
+
         let mut chunks = vec![];
         while read < value.len() {
             let chunk = Chunk::try_from(&value[read..])?;
@@ -79,7 +84,7 @@ impl TryFrom<&[u8]> for Png {
             chunks.push(chunk);
         }
 
-        Ok(Self{header: value[..8].try_into()?, chunks})
+        Ok(Self{header, chunks})
     }
 }
 
