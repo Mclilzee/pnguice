@@ -71,7 +71,7 @@ impl TryFrom<&[u8]> for Png {
     type Error = Error;
 
     fn try_from(value: &[u8]) -> std::result::Result<Self, Self::Error> {
-        let mut read = 12;
+        let mut read = 8;
         let mut chunks = vec![];
         while read < value.len() {
             let chunk = Chunk::try_from(&value[read..])?;
