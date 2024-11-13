@@ -43,7 +43,18 @@ fn main() -> Result<()> {
             file.write_all(&png.as_bytes())?;
         }
         OperationMode::Decode { path, chunk_type } => {}
-        OperationMode::Remove { path, chunk_type } => {}
+        OperationMode::Remove { path, chunk_type } => {
+            let mut file = File::open(&path)?;
+
+            let mut reader = BufReader::new(&file);
+            let mut buf = Vec::new();
+            reader.read_to_end(&mut buf)?;
+
+            let mut png = Png::try_from(buf.as_ref())?;
+            png.remove_first_chunk(&chunk_type)?;
+
+            file.write_all(&png.as_bytes())?;
+        }
         OperationMode::Print { path } => {}
     }
     Ok(())
