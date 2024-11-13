@@ -44,7 +44,19 @@ fn main() -> Result<()> {
 
             output.write_all(&png.as_bytes())?;
         }
-        OperationMode::Decode { path, chunk_type } => {}
+        OperationMode::Decode { path, chunk_type } => {
+            let file = File::open(&path)?;
+
+            let mut reader = BufReader::new(&file);
+            let mut buf = Vec::new();
+            reader.read_to_end(&mut buf)?;
+            let png = Png::try_from(buf.as_ref())?;
+            let chunk = png.chunk_by_type(&chunk_type);
+            match chunk {
+                Some(chunk) => println!("{}", chunk.data_as_string()?),
+                None => println!("No message were found for that chunk type")
+            }
+        }
         OperationMode::Remove { path, chunk_type } => {
             let file = File::open(&path)?;
 
