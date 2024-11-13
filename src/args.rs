@@ -6,11 +6,11 @@ use clap::{Parser, Subcommand};
 #[command(version, about, long_about = None)]
 pub struct Args {
     #[command(subcommand)]
-    command: OperationMode,
+    pub command: OperationMode,
 }
 
 #[derive(Debug, Subcommand)]
-enum OperationMode {
+pub enum OperationMode {
     Encode {
         path: PathBuf,
         chunk_type: String,
