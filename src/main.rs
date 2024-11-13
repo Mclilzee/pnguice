@@ -5,7 +5,10 @@ mod commands;
 mod png;
 
 use anyhow::Result;
+use clap::Parser;
+use args::Args;
 
 fn main() -> Result<()> {
-    todo!()
+    let args = Args::parse();
+    Ok(())
 }
