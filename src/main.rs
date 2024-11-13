@@ -9,6 +9,6 @@ use clap::Parser;
 use args::Args;
 
 fn main() -> Result<()> {
-    let args = Args::parse();
+    let _args = Args::parse();
     Ok(())
 }
