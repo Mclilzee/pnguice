@@ -126,6 +126,7 @@ mod tests {
     use crate::chunk::Chunk;
     use crate::chunk_type::ChunkType;
     use std::convert::TryFrom;
+    use std::io::BufReader;
 
     fn testing_chunks() -> Vec<Chunk> {
         vec![
@@ -278,6 +279,13 @@ mod tests {
         let png: Png = TryFrom::try_from(bytes.as_ref()).unwrap();
 
         let _png_string = format!("{}", png);
+    }
+
+    #[test]
+    fn test_png_try_from_reader() {
+        let mut reader = BufReader::new(&PNG_FILE[..]);
+        let png = Png::try_from_reader(&mut reader);
+        assert!(png.is_ok());
     }
 
     // This is the raw bytes for a shrunken version of the `dice.png` image on Wikipedia
