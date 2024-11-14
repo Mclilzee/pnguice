@@ -39,7 +39,7 @@ fn main() -> Result<()> {
             let mut output = if let Some(output) = output_file {
                 File::create_new(output)?
             } else {
-                File::create_new(path)?
+                File::create(path)?
             };
 
             output.write_all(&png.as_bytes())?;
