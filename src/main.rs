@@ -6,7 +6,7 @@ mod png;
 
 use std::{
     fs::File,
-    io::{BufReader, Read, Write},
+    io::{BufReader, Write},
 };
 
 use anyhow::Result;
@@ -31,9 +31,7 @@ fn main() -> Result<()> {
             let chunk = Chunk::new(chunk_type, message.bytes().collect());
 
             let mut reader = BufReader::new(&file);
-            let mut buf = Vec::new();
-            reader.read_to_end(&mut buf)?;
-            let mut png = Png::try_from(buf.as_ref())?;
+            let mut png = Png::try_from_reader(&mut reader)?;
             png.append_chunk(chunk);
 
             let mut output = if let Some(output) = output_file {
@@ -48,9 +46,7 @@ fn main() -> Result<()> {
             let file = File::open(&path)?;
 
             let mut reader = BufReader::new(&file);
-            let mut buf = Vec::new();
-            reader.read_to_end(&mut buf)?;
-            let png = Png::try_from(buf.as_ref())?;
+            let png = Png::try_from_reader(&mut reader)?;
             let chunk = png.chunk_by_type(&chunk_type);
             match chunk {
                 Some(chunk) => println!("{}", chunk.data_as_string()?),
@@ -61,10 +57,7 @@ fn main() -> Result<()> {
             let file = File::open(&path)?;
 
             let mut reader = BufReader::new(&file);
-            let mut buf = Vec::new();
-            reader.read_to_end(&mut buf)?;
-
-            let mut png = Png::try_from(buf.as_ref())?;
+            let mut png = Png::try_from_reader(&mut reader)?;
             png.remove_first_chunk(&chunk_type)?;
 
             File::create(&path)?.write_all(&png.as_bytes())?;
