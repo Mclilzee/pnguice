@@ -25,7 +25,4 @@ pub enum OperationMode {
         path: PathBuf,
         chunk_type: String,
     },
-    Print {
-        path: PathBuf,
-    },
 }

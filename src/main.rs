@@ -69,7 +69,6 @@ fn main() -> Result<()> {
 
             File::create(&path)?.write_all(&png.as_bytes())?;
         }
-        OperationMode::Print { path } => {}
     }
     Ok(())
 }
