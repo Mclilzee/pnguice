@@ -4,7 +4,7 @@ use std::fmt::Display;
 
 use anyhow::{Context, Error, Result};
 
-#[derive(PartialEq, Debug, Default)]
+#[derive(PartialEq, Debug, Default, Eq)]
 pub struct ChunkType {
     bytes: [u8; 4],
 }
