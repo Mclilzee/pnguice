@@ -65,6 +65,25 @@ impl Png {
             .chain(self.chunks.iter().flat_map(|c| c.as_bytes()))
             .collect()
     }
+
+    pub fn try_from_reader<T: std::io::Read>(reader: &mut T) -> Result<Self> {
+        let mut header = [0u8; 8];
+        reader.read_exact(&mut header)?;
+        if header != Self::STANDARD_HEADER {
+            bail!("Not a valid PNG header");
+        }
+
+        let mut chunks = vec![];
+        while let Ok(chunk) = Chunk::try_from_reader(reader) {
+            chunks.push(chunk);
+        }
+
+        if chunks.is_empty() {
+            bail!("This file contains no png data");
+        }
+
+        Ok(Self { header, chunks })
+    }
 }
 
 impl TryFrom<&[u8]> for Png {

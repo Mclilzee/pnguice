@@ -54,6 +54,32 @@ impl Chunk {
             .copied()
             .collect()
     }
+
+    pub fn try_from_reader<T: Read>(reader: &mut T) -> Result<Self> {
+        let mut buf = [0u8; 4];
+        reader.read_exact(&mut buf)?;
+        let length = u32::from_be_bytes(buf) as usize;
+
+        let mut chunk_type: [u8; 4] = [0u8; 4];
+        reader.read_exact(&mut chunk_type)?;
+
+        let mut data = vec![0; length];
+        reader.read_exact(&mut data)?;
+
+        reader.read_exact(&mut buf)?;
+        let crc = u32::from_be_bytes(buf);
+
+        let bytes_to_check = chunk_type.iter().chain(data.iter()).copied().collect::<Vec<u8>>();
+        if CRC.checksum(&bytes_to_check) != crc {
+            bail!("Chunk data has been tempered with and is corrupted");
+        }
+
+        Ok(Self {
+            crc,
+            data,
+            chunk_type: ChunkType::try_from(chunk_type.to_owned())?,
+        })
+    }
 }
 
 impl TryFrom<&[u8]> for Chunk {
@@ -225,6 +251,51 @@ mod tests {
             .collect();
 
         let chunk: Chunk = TryFrom::try_from(chunk_data.as_ref()).unwrap();
+
+        let _chunk_string = format!("{}", chunk);
+    }
+
+
+    #[test]
+    fn test_invalid_chunk_from_reader() {
+        let data_length: u32 = 42;
+        let chunk_type = "RuSt".as_bytes();
+        let message_bytes = "This is where your secret message will be!".as_bytes();
+        let crc: u32 = 2882656333;
+
+        let chunk_data: Vec<u8> = data_length
+            .to_be_bytes()
+            .iter()
+            .chain(chunk_type.iter())
+            .chain(message_bytes.iter())
+            .chain(crc.to_be_bytes().iter())
+            .copied()
+            .collect();
+
+        let mut reader = BufReader::new(chunk_data.as_slice());
+        let chunk = Chunk::try_from_reader(&mut reader);
+
+        assert!(chunk.is_err());
+    }
+
+    #[test]
+    pub fn test_chunk_try_from_reader() {
+        let data_length: u32 = 42;
+        let chunk_type = "RuSt".as_bytes();
+        let message_bytes = "This is where your secret message will be!".as_bytes();
+        let crc: u32 = 2882656334;
+
+        let chunk_data: Vec<u8> = data_length
+            .to_be_bytes()
+            .iter()
+            .chain(chunk_type.iter())
+            .chain(message_bytes.iter())
+            .chain(crc.to_be_bytes().iter())
+            .copied()
+            .collect();
+
+        let mut reader = BufReader::new(chunk_data.as_slice());
+        let chunk = Chunk::try_from_reader(&mut reader).unwrap();
 
         let _chunk_string = format!("{}", chunk);
     }
