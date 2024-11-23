@@ -26,8 +26,7 @@ impl Png {
 
     pub fn chunk_by_type(&self, chunk_type: &str) -> Option<&Chunk> {
         let chunk_type: ChunkType = chunk_type.parse().ok()?;
-
-        self.chunks.iter().find(|c| &chunk_type == c.chunk_type())
+        self.chunks.iter().rev().find(|c| &chunk_type == c.chunk_type())
     }
 
     pub fn append_chunk(&mut self, chunk: Chunk) {
