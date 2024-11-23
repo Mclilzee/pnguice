@@ -41,6 +41,7 @@ impl Png {
             .chunks
             .iter()
             .enumerate()
+            .rev()
             .find(|(_, c)| c.chunk_type() == &chunk_type)
             .map(|(i, _)| i);
 
@@ -49,10 +50,6 @@ impl Png {
         } else {
             bail!("Chunk type were not found")
         }
-    }
-
-    pub fn from_str(str: &str) -> Result<Self> {
-        todo!()
     }
 
     pub fn chunks(&self) -> &[Chunk] {
